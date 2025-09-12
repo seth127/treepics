@@ -5,7 +5,10 @@ description = "Map app/site for exploring pictures of awesome trees"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "exifread>=3.5.1",
     "jinja2>=3.1.6",
     "pandas>=2.3.2",
     "pillow>=11.3.0",
+    "pillow-heif",
+    "pyheif-pillow-opener",
 ]

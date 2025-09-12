@@ -92,19 +92,29 @@ def main():
     # Step 4: Copy site files to branch
     print("\n📁 Step 4: Copying generated site files...")
     
-    # First, save the generated site to a temp location
+    # Save current working directory
+    original_dir = Path.cwd()
+    
+    # First, save the generated site and web_photos to temp locations
     temp_site = Path("../temp_treepics_site")
+    temp_photos = Path("../temp_treepics_photos")
+    
     if temp_site.exists():
         shutil.rmtree(temp_site)
+    if temp_photos.exists():
+        shutil.rmtree(temp_photos)
     
-    # Go back to source branch to get the built site
+    # Go back to source branch to get the built site and web_photos
     run_command(f"git checkout {current_branch}")
     if not site_dir.exists():
         print("❌ Site not found. Running build first...")
         run_command("uv run python main.py")
     
-    # Copy the built site to temp location
+    # Copy the built site and web_photos to temp locations
     shutil.copytree(site_dir, temp_site)
+    web_photos_dir = Path("web_photos")
+    if web_photos_dir.exists():
+        shutil.copytree(web_photos_dir, temp_photos)
     
     # Switch back to gh-pages and clear it
     run_command("git checkout gh-pages")
@@ -117,17 +127,26 @@ def main():
             else:
                 item.unlink()
     
-    # Copy all files from temp site to root of gh-pages
+    # Copy all files from temp site to root of gh-pages (not in treepics-map subdir)
     for item in temp_site.iterdir():
         if item.is_dir():
             shutil.copytree(item, item.name, dirs_exist_ok=True)
         else:
             shutil.copy2(item, '.')
     
-    # Clean up temp directory
-    shutil.rmtree(temp_site)
+    # Replace the photos directory with web_photos content
+    if Path("photos").exists():
+        shutil.rmtree("photos")
+    if temp_photos.exists():
+        shutil.copytree(temp_photos, "photos")
     
-    print("✅ Site files copied to gh-pages branch!")
+    # Clean up temp directories
+    if temp_site.exists():
+        shutil.rmtree(temp_site)
+    if temp_photos.exists():
+        shutil.rmtree(temp_photos)
+    
+    print("✅ Site files and photos copied to gh-pages branch!")
     
     # Step 5: Commit and push
     print("\n📤 Step 5: Committing and pushing to GitHub...")

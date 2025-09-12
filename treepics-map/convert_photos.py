@@ -24,13 +24,16 @@ from PIL.ExifTags import TAGS, GPSTAGS
 import pillow_heif
 
 def convert_heic_to_jpg(heic_path, jpg_path, quality=85, max_size=1920):
-    """Convert a HEIC file to JPG with web optimization."""
+    """Convert a HEIC file to JPG with web optimization and metadata preservation."""
     try:
         # Register HEIF opener with Pillow
         pillow_heif.register_heif_opener()
         
         # Open and convert the HEIC image
         with Image.open(heic_path) as img:
+            # Preserve EXIF data including GPS
+            exif_data = img.getexif()
+            
             # Convert to RGB if necessary
             if img.mode != 'RGB':
                 img = img.convert('RGB')
@@ -39,8 +42,11 @@ def convert_heic_to_jpg(heic_path, jpg_path, quality=85, max_size=1920):
             if max(img.size) > max_size:
                 img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
             
-            # Save as JPG with quality optimization
-            img.save(jpg_path, 'JPEG', quality=quality, optimize=True)
+            # Save as JPG with quality optimization AND preserved EXIF data
+            if exif_data:
+                img.save(jpg_path, 'JPEG', quality=quality, optimize=True, exif=exif_data)
+            else:
+                img.save(jpg_path, 'JPEG', quality=quality, optimize=True)
             
         return True
         

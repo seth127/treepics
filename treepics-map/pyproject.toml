@@ -1,0 +1,11 @@
+[project]
+name = "treepics-map"
+version = "0.1.0.8000"
+description = "Map app/site for exploring pictures of awesome trees"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jinja2>=3.1.6",
+    "pandas>=2.3.2",
+    "pillow>=11.3.0",
+]

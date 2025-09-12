@@ -135,10 +135,10 @@ def main():
             shutil.copy2(item, '.')
     
     # Replace the photos directory with web_photos content
-    if Path("photos").exists():
-        shutil.rmtree("photos")
+    if Path(web_photos_dir).exists():
+        shutil.rmtree(web_photos_dir)
     if temp_photos.exists():
-        shutil.copytree(temp_photos, "photos")
+        shutil.copytree(temp_photos, web_photos_dir)
     
     # Clean up temp directories
     if temp_site.exists():

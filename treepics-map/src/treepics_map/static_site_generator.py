@@ -10,7 +10,16 @@ from typing import Dict, List
 
 
 def prepare_photos_for_web(photos_df: pd.DataFrame, photos_dir: str, output_dir: str) -> pd.DataFrame:
-    """Copy photos to output directory and update paths for web serving."""
+    """Convert and copy photos to output directory for web serving."""
+    from PIL import Image
+    
+    # Enable HEIC support
+    try:
+        from pillow_heif import register_heif_opener
+        register_heif_opener()
+    except ImportError:
+        print("Warning: pillow-heif not available. HEIC files may not be processed.")
+    
     photos_web_dir = os.path.join(output_dir, 'photos')
     os.makedirs(photos_web_dir, exist_ok=True)
     
@@ -21,16 +30,37 @@ def prepare_photos_for_web(photos_df: pd.DataFrame, photos_dir: str, output_dir:
         original_path = row['filepath']
         filename = row['filename']
         
-        # Copy photo to web directory
-        destination = os.path.join(photos_web_dir, filename)
+        # Convert HEIC to JPG for web compatibility
+        if filename.lower().endswith(('.heic', '.heif')):
+            web_filename = os.path.splitext(filename)[0] + '.jpg'
+        else:
+            web_filename = filename
+            
+        destination = os.path.join(photos_web_dir, web_filename)
         
         try:
-            shutil.copy2(original_path, destination)
+            if filename.lower().endswith(('.heic', '.heif')):
+                # Convert HEIC to JPEG
+                with Image.open(original_path) as img:
+                    # Convert to RGB if necessary (HEIC might be in different color space)
+                    if img.mode != 'RGB':
+                        img = img.convert('RGB')
+                    # Resize for web if too large (optional - saves bandwidth)
+                    max_size = 1920  # Max width/height
+                    if img.width > max_size or img.height > max_size:
+                        img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+                    # Save as JPEG
+                    img.save(destination, 'JPEG', quality=85, optimize=True)
+            else:
+                # Copy other formats directly
+                shutil.copy2(original_path, destination)
+            
             # Update the filepath to be relative to the web root
-            web_df.at[idx, 'web_path'] = f'photos/{filename}'
+            web_df.at[idx, 'web_path'] = f'photos/{web_filename}'
+            
         except Exception as e:
-            print(f"Error copying {original_path}: {e}")
-            # Remove this row if we can't copy the photo
+            print(f"Error processing {original_path}: {e}")
+            # Remove this row if we can't process the photo
             web_df = web_df.drop(idx)
     
     return web_df.reset_index(drop=True)

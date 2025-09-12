@@ -8,6 +8,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 
+# Enable HEIC support
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    print("Warning: pillow-heif not available. HEIC files may not be processed.")
+
 
 def get_decimal_from_dms(dms_coord: Tuple, ref: str) -> float:
     """Convert GPS coordinates from degrees/minutes/seconds to decimal format."""
@@ -43,10 +50,10 @@ def extract_photo_metadata(image_path: str) -> Dict:
             metadata['image_width'] = image.size[0]
             metadata['image_height'] = image.size[1]
             
-            # Extract EXIF data
-            exif_data = image._getexif()
+            # Extract EXIF data - use getexif() instead of _getexif() for better compatibility
+            exif_data = image.getexif()
             
-            if exif_data is not None:
+            if exif_data is not None and len(exif_data) > 0:
                 for tag_id, value in exif_data.items():
                     tag = TAGS.get(tag_id, tag_id)
                     
@@ -59,9 +66,13 @@ def extract_photo_metadata(image_path: str) -> Dict:
                         metadata['camera_make'] = value
                     elif tag == 'Model':
                         metadata['camera_model'] = value
-                    elif tag == 'GPSInfo':
+                
+                # Handle GPS data - check for GPS IFD
+                if 34853 in exif_data:  # GPS IFD tag
+                    try:
+                        gps_ifd = exif_data.get_ifd(34853)
                         gps_data = {}
-                        for gps_tag_id, gps_value in value.items():
+                        for gps_tag_id, gps_value in gps_ifd.items():
                             gps_tag = GPSTAGS.get(gps_tag_id, gps_tag_id)
                             gps_data[gps_tag] = gps_value
                         
@@ -73,6 +84,8 @@ def extract_photo_metadata(image_path: str) -> Dict:
                         if 'GPSLongitude' in gps_data and 'GPSLongitudeRef' in gps_data:
                             lon = get_decimal_from_dms(gps_data['GPSLongitude'], gps_data['GPSLongitudeRef'])
                             metadata['longitude'] = lon
+                    except Exception as gps_error:
+                        print(f"GPS extraction error for {image_path}: {gps_error}")
     
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
@@ -82,7 +95,7 @@ def extract_photo_metadata(image_path: str) -> Dict:
 
 def process_photo_directory(photos_dir: str) -> pd.DataFrame:
     """Process all photos in a directory and return a DataFrame with metadata."""
-    photo_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif'}
+    photo_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif', '.heic', '.heif'}
     metadata_list = []
     
     photos_path = Path(photos_dir)

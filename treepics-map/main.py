@@ -19,8 +19,8 @@ from treepics_map.static_site_generator import generate_static_site
 def main():
     parser = argparse.ArgumentParser(description='Generate an interactive map from tree photos')
     parser.add_argument('--photos-dir', '-p', 
-                       default='photos',
-                       help='Directory containing photos (default: photos)')
+                       default='web_photos',
+                       help='Directory containing web-ready photos (default: web_photos)')
     parser.add_argument('--output-dir', '-o',
                        default='output/site', 
                        help='Output directory for generated site (default: output/site)')
@@ -42,11 +42,11 @@ def main():
     # Check if photos directory exists
     if not photos_dir.exists():
         print(f"Photos directory '{photos_dir}' not found.")
-        print("Please add your tree photos to this directory and try again.")
-        print("\nTo get started:")
-        print("1. Create a 'photos' directory")
-        print("2. Add your tree photos with GPS metadata")
-        print("3. Run this script again")
+        print("💡 Run 'python convert_photos.py' first to convert HEIC files to web-ready JPGs")
+        print("\nWorkflow:")
+        print("1. Add HEIC photos to 'photos/' directory") 
+        print("2. Run 'python convert_photos.py' to create web-ready JPGs")
+        print("3. Run 'python main.py' to build the site")
         return
     
     print(f"Processing photos from: {photos_dir}")

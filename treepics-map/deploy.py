@@ -38,6 +38,7 @@ def main():
     
     # Step 1: Build the site
     print("📸 Step 1: Building the static site...")
+    print("💡 Note: Make sure you've run 'python convert_photos.py' first")
     run_command("uv run python main.py")
     print("✅ Site built successfully!")
     

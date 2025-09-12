@@ -96,8 +96,9 @@ def main():
     original_dir = Path.cwd()
     
     # First, save the generated site and web_photos to temp locations
-    temp_site = Path("../temp_treepics_site")
-    temp_photos = Path("../temp_treepics_photos")
+    run_command(f"mkdir -p /tmp/treepics")
+    temp_site = Path("/tmp/treepics/temp_treepics_site")
+    temp_photos = Path("/tmp/treepics/temp_treepics_photos")
     
     if temp_site.exists():
         shutil.rmtree(temp_site)
@@ -133,12 +134,20 @@ def main():
             shutil.copytree(item, item.name, dirs_exist_ok=True)
         else:
             shutil.copy2(item, '.')
-    
+
+    ### Seth TODO: this ^ doesn't seem to be working. Hack incoming...
+
+
+    ### Seth: I'm not sure this is necessary, but if so it would need to be before the hack
     # Replace the photos directory with web_photos content
     if Path(web_photos_dir).exists():
         shutil.rmtree(web_photos_dir)
     if temp_photos.exists():
         shutil.copytree(temp_photos, web_photos_dir)
+    
+
+    #### end hack
+
     
     # Clean up temp directories
     if temp_site.exists():

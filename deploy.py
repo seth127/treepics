@@ -165,20 +165,30 @@ def deploy():
     # Add all files to git
     run_command(['git', 'add', '.'])
     
-    # Check if there are changes to commit
-    try:
-        run_command(['git', 'diff', '--staged', '--quiet'], check=False)
-        print("No changes to commit - site is already up to date")
-    except subprocess.CalledProcessError:
-        # There are changes to commit
-        print("Committing changes...")
-        run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
-        
-        # Push to origin
-        print("Pushing to origin/gh-pages...")
-        run_command(['git', 'push', 'origin', 'gh-pages'])
-        
-        print("✅ Successfully deployed to GitHub Pages!")
+    ## Check if there are changes to commit
+    #try:
+    #    run_command(['git', 'diff', '--staged', '--quiet'], check=False)
+    #    print("No changes to commit - site is already up to date")
+    #except subprocess.CalledProcessError:
+    #    # There are changes to commit
+    #    print("Committing changes...")
+    #    run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
+    #    
+    #    # Push to origin
+    #    print("Pushing to origin/gh-pages...")
+    #    run_command(['git', 'push', 'origin', 'gh-pages'])
+    #    
+    #    print("✅ Successfully deployed to GitHub Pages!")
+
+    # There are changes to commit
+    print("Committing changes...")
+    run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
+    
+    # Push to origin
+    print("Pushing to origin/gh-pages...")
+    run_command(['git', 'push', 'origin', 'gh-pages'])
+    
+    print("✅ Successfully deployed to GitHub Pages!")
     
     # Switch back to original branch
     print(f"Switching back to {current_branch}...")

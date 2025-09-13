@@ -169,8 +169,12 @@ def deploy():
     try:
         run_command(['git', 'diff', '--staged', '--quiet'], check=False)
         print("No changes to commit - site is already up to date")
+        has_changes = False
     except subprocess.CalledProcessError:
         # There are changes to commit
+        has_changes = True
+    
+    if has_changes:
         print("Committing changes...")
         run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
         
@@ -179,6 +183,10 @@ def deploy():
         run_command(['git', 'push', 'origin', 'gh-pages'])
         
         print("✅ Successfully deployed to GitHub Pages!")
+    
+    # Always ensure working directory is clean before switching branches
+    # This handles the case where files were added but no commit was needed
+    run_command(['git', 'reset', '--hard', 'HEAD'])
     
     # Switch back to original branch
     print(f"Switching back to {current_branch}...")

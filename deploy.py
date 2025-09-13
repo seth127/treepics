@@ -189,6 +189,10 @@ def deploy():
     run_command(['git', 'push', 'origin', 'gh-pages'])
     
     print("✅ Successfully deployed to GitHub Pages!")
+
+    # TODO: this ^ seems to be working but revisit
+    # if there should be some better error handling or something
+    # and clean up the commented code
     
     # Switch back to original branch
     print(f"Switching back to {current_branch}...")

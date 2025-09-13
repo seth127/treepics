@@ -124,57 +124,74 @@ def generate_map_html(clusters: List[Dict], output_path: str) -> None:
         </header>
         
         <div id="date-filters">
-            <h3>📅 Filter Photos by Date</h3>
+            <h3 onclick="toggleFiltersCollapse()">
+                📅 Filter Photos by Date
+                <span class="collapse-icon">▼</span>
+            </h3>
             
-            <div class="filter-section">
-                <h4>Timeline Filter</h4>
-                <div class="timeline-container">
-                    <input type="range" 
-                           id="timeline-slider" 
-                           class="timeline-slider"
-                           min="0" 
-                           max="100" 
-                           value="100"
-                           step="1">
-                    <div class="timeline-range">
-                        <span id="timeline-start">Start Date</span>
-                        <span id="timeline-end">End Date</span>
+            <div class="date-filters-content" id="date-filters-content">
+                <div class="filter-section">
+                    <h4>Date Range Filter</h4>
+                    <div class="timeline-container">
+                        <div class="dual-range-container">
+                            <div class="timeline-track">
+                                <div class="timeline-range-fill" id="timeline-range-fill"></div>
+                            </div>
+                            <input type="range" 
+                                   id="timeline-slider-start" 
+                                   class="timeline-slider"
+                                   min="0" 
+                                   max="100" 
+                                   value="0"
+                                   step="1">
+                            <input type="range" 
+                                   id="timeline-slider-end" 
+                                   class="timeline-slider"
+                                   min="0" 
+                                   max="100" 
+                                   value="100"
+                                   step="1">
+                        </div>
+                        <div class="timeline-range">
+                            <span id="timeline-start">Start Date</span>
+                            <span id="timeline-end">End Date</span>
+                        </div>
+                        <div class="timeline-current" id="timeline-current">
+                            Showing all photos
+                        </div>
                     </div>
-                    <div class="timeline-current" id="timeline-current">
-                        Showing all photos
+                </div>
+                
+                <div class="filter-section">
+                    <h4>Select Months</h4>
+                    <div class="month-controls">
+                        <button class="month-control-btn" onclick="selectAllMonths()">All</button>
+                        <button class="month-control-btn" onclick="clearAllMonths()">None</button>
+                    </div>
+                    <div class="month-grid" id="month-grid">
+                        <button class="month-btn selected" data-month="0">Jan</button>
+                        <button class="month-btn selected" data-month="1">Feb</button>
+                        <button class="month-btn selected" data-month="2">Mar</button>
+                        <button class="month-btn selected" data-month="3">Apr</button>
+                        <button class="month-btn selected" data-month="4">May</button>
+                        <button class="month-btn selected" data-month="5">Jun</button>
+                        <button class="month-btn selected" data-month="6">Jul</button>
+                        <button class="month-btn selected" data-month="7">Aug</button>
+                        <button class="month-btn selected" data-month="8">Sep</button>
+                        <button class="month-btn selected" data-month="9">Oct</button>
+                        <button class="month-btn selected" data-month="10">Nov</button>
+                        <button class="month-btn selected" data-month="11">Dec</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="filter-section">
-                <h4>Select Months</h4>
-                <div class="month-controls">
-                    <button class="month-control-btn" onclick="selectAllMonths()">All</button>
-                    <button class="month-control-btn" onclick="clearAllMonths()">None</button>
+                
+                <div class="filter-results" id="filter-results">
+                    <strong>All photos shown</strong> (no filters active)
                 </div>
-                <div class="month-grid" id="month-grid">
-                    <button class="month-btn selected" data-month="0">Jan</button>
-                    <button class="month-btn selected" data-month="1">Feb</button>
-                    <button class="month-btn selected" data-month="2">Mar</button>
-                    <button class="month-btn selected" data-month="3">Apr</button>
-                    <button class="month-btn selected" data-month="4">May</button>
-                    <button class="month-btn selected" data-month="5">Jun</button>
-                    <button class="month-btn selected" data-month="6">Jul</button>
-                    <button class="month-btn selected" data-month="7">Aug</button>
-                    <button class="month-btn selected" data-month="8">Sep</button>
-                    <button class="month-btn selected" data-month="9">Oct</button>
-                    <button class="month-btn selected" data-month="10">Nov</button>
-                    <button class="month-btn selected" data-month="11">Dec</button>
-                </div>
+                
+                <button class="clear-filters" onclick="clearAllFilters()" disabled>
+                    Clear All Filters
+                </button>
             </div>
-            
-            <div class="filter-results" id="filter-results">
-                <strong>All photos shown</strong> (no filters active)
-            </div>
-            
-            <button class="clear-filters" onclick="clearAllFilters()" disabled>
-                Clear All Filters
-            </button>
         </div>
 
         <div id="map"></div>
@@ -506,6 +523,30 @@ header p {
     color: #2d5a27;
     border-bottom: 2px solid #4a7c59;
     padding-bottom: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.collapse-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.collapse-icon.collapsed {
+    transform: rotate(-90deg);
+}
+
+.date-filters-content {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.date-filters-content.collapsed {
+    max-height: 0;
+    opacity: 0;
 }
 
 .filter-section {
@@ -527,14 +568,20 @@ header p {
     margin: 1rem 0;
 }
 
+.dual-range-container {
+    position: relative;
+    margin: 10px 0;
+}
+
 .timeline-slider {
+    position: absolute;
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: #ddd;
+    background: transparent;
     outline: none;
     -webkit-appearance: none;
-    margin: 10px 0;
+    pointer-events: none;
 }
 
 .timeline-slider::-webkit-slider-thumb {
@@ -547,6 +594,9 @@ header p {
     cursor: pointer;
     border: 2px solid #2d5a27;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
 }
 
 .timeline-slider::-moz-range-thumb {
@@ -557,6 +607,25 @@ header p {
     cursor: pointer;
     border: 2px solid #2d5a27;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #ddd;
+    position: relative;
+}
+
+.timeline-range-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #4a7c59, #2d5a27);
+    position: absolute;
+    top: 0;
 }
 
 .timeline-range {
@@ -754,6 +823,7 @@ let currentPhotoIndex = 0; // Index of currently displayed photo in modal
 let timelineStart = null;
 let timelineEnd = null;
 let selectedMonths = new Set([0,1,2,3,4,5,6,7,8,9,10,11]); // All months selected by default
+let filtersCollapsed = false;
 
 function initializeMap(photoClusters) {
     // Initialize the map
@@ -1125,16 +1195,30 @@ function initializeDateFilters() {
     timelineStart = new Date(Math.min(...dates));
     timelineEnd = new Date(Math.max(...dates));
     
-    // Initialize timeline slider
-    const slider = document.getElementById('timeline-slider');
+    // Initialize timeline sliders
+    const startSlider = document.getElementById('timeline-slider-start');
+    const endSlider = document.getElementById('timeline-slider-end');
     const timelineStartEl = document.getElementById('timeline-start');
     const timelineEndEl = document.getElementById('timeline-end');
     
     timelineStartEl.textContent = formatDate(timelineStart);
     timelineEndEl.textContent = formatDate(timelineEnd);
     
-    // Set up timeline slider event listener
-    slider.addEventListener('input', function() {
+    // Set up timeline slider event listeners
+    startSlider.addEventListener('input', function() {
+        // Ensure start doesn't exceed end
+        if (parseInt(this.value) > parseInt(endSlider.value)) {
+            this.value = endSlider.value;
+        }
+        updateTimelineFilter();
+        applyFilters();
+    });
+    
+    endSlider.addEventListener('input', function() {
+        // Ensure end doesn't go below start
+        if (parseInt(this.value) < parseInt(startSlider.value)) {
+            this.value = startSlider.value;
+        }
         updateTimelineFilter();
         applyFilters();
     });
@@ -1153,27 +1237,44 @@ function initializeDateFilters() {
 }
 
 function updateTimelineFilter() {
-    const slider = document.getElementById('timeline-slider');
+    const startSlider = document.getElementById('timeline-slider-start');
+    const endSlider = document.getElementById('timeline-slider-end');
     const currentEl = document.getElementById('timeline-current');
-    const percentage = slider.value / 100;
+    const rangeFill = document.getElementById('timeline-range-fill');
     
-    if (percentage === 1) {
+    const startPercentage = startSlider.value / 100;
+    const endPercentage = endSlider.value / 100;
+    
+    // Update visual range fill
+    rangeFill.style.left = (startPercentage * 100) + '%';
+    rangeFill.style.width = ((endPercentage - startPercentage) * 100) + '%';
+    
+    if (startPercentage === 0 && endPercentage === 1) {
         currentEl.innerHTML = '<strong>Showing all photos</strong>';
-        return null;
+        return { startDate: null, endDate: null };
     }
     
-    // Calculate cutoff date based on percentage
+    // Calculate actual dates based on percentages
     const totalTime = timelineEnd.getTime() - timelineStart.getTime();
-    const cutoffTime = timelineStart.getTime() + (totalTime * percentage);
-    const cutoffDate = new Date(cutoffTime);
+    const startTime = timelineStart.getTime() + (totalTime * startPercentage);
+    const endTime = timelineStart.getTime() + (totalTime * endPercentage);
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
     
-    currentEl.innerHTML = `<strong>Photos through:</strong><br>${formatDate(cutoffDate)}`;
-    return cutoffDate;
+    if (startPercentage === 0) {
+        currentEl.innerHTML = `<strong>Photos through:</strong><br>${formatDate(endDate)}`;
+    } else if (endPercentage === 1) {
+        currentEl.innerHTML = `<strong>Photos from:</strong><br>${formatDate(startDate)}`;
+    } else {
+        currentEl.innerHTML = `<strong>Photos from:</strong><br>${formatDate(startDate)}<br><strong>to:</strong> ${formatDate(endDate)}`;
+    }
+    
+    return { startDate, endDate };
 }
 
 function applyFilters() {
-    // Get current timeline cutoff
-    const timelineCutoff = updateTimelineFilter();
+    // Get current timeline range
+    const timelineRange = updateTimelineFilter();
     
     // Filter photos based on timeline and selected months
     filteredPhotos = allPhotos.filter(photo => {
@@ -1182,7 +1283,10 @@ function applyFilters() {
         const photoDate = new Date(photo.datetime_taken);
         
         // Check timeline filter
-        if (timelineCutoff && photoDate > timelineCutoff) {
+        if (timelineRange.startDate && photoDate < timelineRange.startDate) {
+            return false;
+        }
+        if (timelineRange.endDate && photoDate > timelineRange.endDate) {
             return false;
         }
         
@@ -1237,9 +1341,11 @@ function clearAllMonths() {
 }
 
 function clearAllFilters() {
-    // Reset timeline slider
-    const slider = document.getElementById('timeline-slider');
-    slider.value = 100;
+    // Reset timeline sliders
+    const startSlider = document.getElementById('timeline-slider-start');
+    const endSlider = document.getElementById('timeline-slider-end');
+    startSlider.value = 0;
+    endSlider.value = 100;
     
     // Reset month selection
     selectAllMonths();
@@ -1263,8 +1369,9 @@ function updateFilterResults() {
 
 function updateClearFiltersButton() {
     const clearBtn = document.querySelector('.clear-filters');
-    const slider = document.getElementById('timeline-slider');
-    const isTimelineFiltered = slider.value < 100;
+    const startSlider = document.getElementById('timeline-slider-start');
+    const endSlider = document.getElementById('timeline-slider-end');
+    const isTimelineFiltered = startSlider.value > 0 || endSlider.value < 100;
     const isMonthFiltered = selectedMonths.size < 12;
     
     clearBtn.disabled = !isTimelineFiltered && !isMonthFiltered;
@@ -1295,6 +1402,22 @@ function formatDate(date) {
         month: 'short',
         day: 'numeric'
     });
+}
+
+// Collapse/expand functionality
+function toggleFiltersCollapse() {
+    const content = document.getElementById('date-filters-content');
+    const icon = document.querySelector('.collapse-icon');
+    
+    filtersCollapsed = !filtersCollapsed;
+    
+    if (filtersCollapsed) {
+        content.classList.add('collapsed');
+        icon.classList.add('collapsed');
+    } else {
+        content.classList.remove('collapsed');
+        icon.classList.remove('collapsed');
+    }
 }
 """
     

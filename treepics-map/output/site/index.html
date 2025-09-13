@@ -16,57 +16,74 @@
         </header>
         
         <div id="date-filters">
-            <h3>📅 Filter Photos by Date</h3>
+            <h3 onclick="toggleFiltersCollapse()">
+                📅 Filter Photos by Date
+                <span class="collapse-icon">▼</span>
+            </h3>
             
-            <div class="filter-section">
-                <h4>Timeline Filter</h4>
-                <div class="timeline-container">
-                    <input type="range" 
-                           id="timeline-slider" 
-                           class="timeline-slider"
-                           min="0" 
-                           max="100" 
-                           value="100"
-                           step="1">
-                    <div class="timeline-range">
-                        <span id="timeline-start">Start Date</span>
-                        <span id="timeline-end">End Date</span>
+            <div class="date-filters-content" id="date-filters-content">
+                <div class="filter-section">
+                    <h4>Date Range Filter</h4>
+                    <div class="timeline-container">
+                        <div class="dual-range-container">
+                            <div class="timeline-track">
+                                <div class="timeline-range-fill" id="timeline-range-fill"></div>
+                            </div>
+                            <input type="range" 
+                                   id="timeline-slider-start" 
+                                   class="timeline-slider"
+                                   min="0" 
+                                   max="100" 
+                                   value="0"
+                                   step="1">
+                            <input type="range" 
+                                   id="timeline-slider-end" 
+                                   class="timeline-slider"
+                                   min="0" 
+                                   max="100" 
+                                   value="100"
+                                   step="1">
+                        </div>
+                        <div class="timeline-range">
+                            <span id="timeline-start">Start Date</span>
+                            <span id="timeline-end">End Date</span>
+                        </div>
+                        <div class="timeline-current" id="timeline-current">
+                            Showing all photos
+                        </div>
                     </div>
-                    <div class="timeline-current" id="timeline-current">
-                        Showing all photos
+                </div>
+                
+                <div class="filter-section">
+                    <h4>Select Months</h4>
+                    <div class="month-controls">
+                        <button class="month-control-btn" onclick="selectAllMonths()">All</button>
+                        <button class="month-control-btn" onclick="clearAllMonths()">None</button>
+                    </div>
+                    <div class="month-grid" id="month-grid">
+                        <button class="month-btn selected" data-month="0">Jan</button>
+                        <button class="month-btn selected" data-month="1">Feb</button>
+                        <button class="month-btn selected" data-month="2">Mar</button>
+                        <button class="month-btn selected" data-month="3">Apr</button>
+                        <button class="month-btn selected" data-month="4">May</button>
+                        <button class="month-btn selected" data-month="5">Jun</button>
+                        <button class="month-btn selected" data-month="6">Jul</button>
+                        <button class="month-btn selected" data-month="7">Aug</button>
+                        <button class="month-btn selected" data-month="8">Sep</button>
+                        <button class="month-btn selected" data-month="9">Oct</button>
+                        <button class="month-btn selected" data-month="10">Nov</button>
+                        <button class="month-btn selected" data-month="11">Dec</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="filter-section">
-                <h4>Select Months</h4>
-                <div class="month-controls">
-                    <button class="month-control-btn" onclick="selectAllMonths()">All</button>
-                    <button class="month-control-btn" onclick="clearAllMonths()">None</button>
+                
+                <div class="filter-results" id="filter-results">
+                    <strong>All photos shown</strong> (no filters active)
                 </div>
-                <div class="month-grid" id="month-grid">
-                    <button class="month-btn selected" data-month="0">Jan</button>
-                    <button class="month-btn selected" data-month="1">Feb</button>
-                    <button class="month-btn selected" data-month="2">Mar</button>
-                    <button class="month-btn selected" data-month="3">Apr</button>
-                    <button class="month-btn selected" data-month="4">May</button>
-                    <button class="month-btn selected" data-month="5">Jun</button>
-                    <button class="month-btn selected" data-month="6">Jul</button>
-                    <button class="month-btn selected" data-month="7">Aug</button>
-                    <button class="month-btn selected" data-month="8">Sep</button>
-                    <button class="month-btn selected" data-month="9">Oct</button>
-                    <button class="month-btn selected" data-month="10">Nov</button>
-                    <button class="month-btn selected" data-month="11">Dec</button>
-                </div>
+                
+                <button class="clear-filters" onclick="clearAllFilters()" disabled>
+                    Clear All Filters
+                </button>
             </div>
-            
-            <div class="filter-results" id="filter-results">
-                <strong>All photos shown</strong> (no filters active)
-            </div>
-            
-            <button class="clear-filters" onclick="clearAllFilters()" disabled>
-                Clear All Filters
-            </button>
         </div>
 
         <div id="map"></div>

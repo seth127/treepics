@@ -97,12 +97,10 @@ def deploy():
     # Ensure we have a clean working directory
     status = run_command(['git', 'status', '--porcelain'], capture_output=True)
     if status:
-        print("Warning: Working directory is not clean:")
+        print("Error: Working directory is not clean:")
         print(status)
-        response = input("Continue anyway? (y/N): ")
-        if response.lower() != 'y':
-            print("Aborting deployment")
-            sys.exit(1)
+        print("Please commit or stash your changes before deploying.")
+        sys.exit(1)
     
     # Get absolute path to source directory before changing branches
     source_dir = source_dir.resolve()

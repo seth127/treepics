@@ -3,6 +3,8 @@ let map;
 let currentMarkers = [];
 let allPhotos = []; // Store all individual photos for dynamic clustering
 let currentZoom = 10;
+let currentClusterPhotos = []; // Photos in the currently viewed cluster
+let currentPhotoIndex = 0; // Index of currently displayed photo in modal
 
 function initializeMap(photoClusters) {
     // Initialize the map
@@ -179,6 +181,9 @@ function getMarkerFontSize(photoCount, markerSize) {
 function showPhotosForCluster(cluster) {
     const photoViewer = document.getElementById('photo-viewer');
     
+    // Store current cluster photos for gallery navigation
+    currentClusterPhotos = cluster.photos;
+    
     let html = `<h3>Photos from this location (${cluster.photo_count})</h3>`;
     
     cluster.photos.forEach((photo, index) => {
@@ -195,7 +200,7 @@ function showPhotosForCluster(cluster) {
             <div class="photo-item">
                 <img src="${photo.web_path}" 
                      alt="${photo.filename}"
-                     onclick="showPhotoModal('${photo.web_path}', '${photo.filename}')"
+                     onclick="showPhotoGallery(${index})"
                      loading="lazy">
                 <div class="photo-info">
                     <div class="photo-date">${dateStr}</div>
@@ -210,45 +215,138 @@ function showPhotosForCluster(cluster) {
     photoViewer.innerHTML = html;
 }
 
-function showPhotoModal(imageSrc, filename) {
+function showPhotoGallery(photoIndex) {
+    currentPhotoIndex = photoIndex;
+    
     // Create modal if it doesn't exist
     let modal = document.getElementById('photo-modal');
     if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'photo-modal';
-        modal.className = 'photo-modal';
-        modal.innerHTML = `
-            <div class="photo-modal-content">
-                <span class="photo-modal-close">&times;</span>
-                <img id="modal-image" src="" alt="">
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        // Add close functionality
-        modal.querySelector('.photo-modal-close').onclick = () => {
-            modal.style.display = 'none';
-        };
-        
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
+        createPhotoModal();
+        modal = document.getElementById('photo-modal');
     }
     
-    // Show the modal with the selected image
-    document.getElementById('modal-image').src = imageSrc;
-    document.getElementById('modal-image').alt = filename;
+    // Update modal content with current photo
+    updateModalPhoto();
+    
+    // Show the modal
     modal.style.display = 'block';
 }
 
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('photo-modal');
-        if (modal) {
+function createPhotoModal() {
+    const modal = document.createElement('div');
+    modal.id = 'photo-modal';
+    modal.className = 'photo-modal';
+    modal.innerHTML = `
+        <div class="photo-modal-content">
+            <div class="photo-modal-counter"></div>
+            <span class="photo-modal-close">&times;</span>
+            <button class="photo-modal-nav photo-modal-prev" onclick="navigateGallery(-1)">
+                &#8249;
+            </button>
+            <div class="photo-modal-image-container">
+                <img id="modal-image" src="" alt="">
+            </div>
+            <button class="photo-modal-nav photo-modal-next" onclick="navigateGallery(1)">
+                &#8250;
+            </button>
+            <div class="photo-modal-info">
+                <div class="photo-title"></div>
+                <div class="photo-details"></div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Add close functionality
+    modal.querySelector('.photo-modal-close').onclick = () => {
+        modal.style.display = 'none';
+    };
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) {
             modal.style.display = 'none';
+        }
+    };
+}
+
+function updateModalPhoto() {
+    if (currentClusterPhotos.length === 0) return;
+    
+    const photo = currentClusterPhotos[currentPhotoIndex];
+    const modal = document.getElementById('photo-modal');
+    
+    // Update image
+    const modalImage = document.getElementById('modal-image');
+    modalImage.src = photo.web_path;
+    modalImage.alt = photo.filename;
+    
+    // Update counter
+    const counter = modal.querySelector('.photo-modal-counter');
+    counter.textContent = `${currentPhotoIndex + 1} of ${currentClusterPhotos.length}`;
+    
+    // Update photo info
+    const title = modal.querySelector('.photo-title');
+    const details = modal.querySelector('.photo-details');
+    
+    title.textContent = photo.filename;
+    
+    const dateStr = photo.datetime_taken ? 
+        new Date(photo.datetime_taken).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) : 'Date unknown';
+    
+    let detailsText = dateStr;
+    if (photo.camera_make && photo.camera_model) {
+        detailsText += ` • ${photo.camera_make} ${photo.camera_model}`;
+    }
+    details.textContent = detailsText;
+    
+    // Update navigation button states
+    const prevBtn = modal.querySelector('.photo-modal-prev');
+    const nextBtn = modal.querySelector('.photo-modal-next');
+    
+    prevBtn.disabled = currentPhotoIndex === 0;
+    nextBtn.disabled = currentPhotoIndex === currentClusterPhotos.length - 1;
+    
+    // Hide navigation buttons if only one photo
+    if (currentClusterPhotos.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+    }
+}
+
+function navigateGallery(direction) {
+    const newIndex = currentPhotoIndex + direction;
+    
+    if (newIndex >= 0 && newIndex < currentClusterPhotos.length) {
+        currentPhotoIndex = newIndex;
+        updateModalPhoto();
+    }
+}
+
+// Keyboard navigation for modal
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('photo-modal');
+    if (modal && modal.style.display === 'block') {
+        switch(e.key) {
+            case 'Escape':
+                modal.style.display = 'none';
+                break;
+            case 'ArrowLeft':
+                navigateGallery(-1);
+                e.preventDefault();
+                break;
+            case 'ArrowRight':
+                navigateGallery(1);
+                e.preventDefault();
+                break;
         }
     }
 });

@@ -401,7 +401,14 @@ function getClusteringThreshold(zoomLevel) {
     
     // Even more aggressive exponential curve (base 3 instead of 2.5)
     // and offset adjustment to make clustering kick in even earlier
-    return baseThreshold * Math.pow(3, zoomFactor - 7);
+    let threshold = baseThreshold * Math.pow(3, zoomFactor - 7);
+    
+    // Set minimum clustering distance (approximately 2-3 city blocks)
+    // ~0.002 degrees ≈ 200-250 meters ≈ 2-3 city blocks in most cities
+    const minimumClusterDistance = 0.002;
+    
+    // Ensure threshold never goes below minimum, even at high zoom levels
+    return Math.max(threshold, minimumClusterDistance);
 }
 
 function performDynamicClustering(photos, threshold) {

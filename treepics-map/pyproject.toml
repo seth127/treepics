@@ -1,6 +1,6 @@
 [project]
 name = "treepics-map"
-version = "0.1.0.8000"
+version = "0.1.0.8001"
 description = "Map app/site for exploring pictures of awesome trees"
 readme = "README.md"
 requires-python = ">=3.11"

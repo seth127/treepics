@@ -2,7 +2,7 @@
 
 # Photo formats
 *.HEIC
-*.jpg
+# *.jpg  # Allow converted web-ready JPGs to be committed
 
 ##########################################
 # templated Python stuff from GitHub

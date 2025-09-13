@@ -95,7 +95,8 @@ def extract_photo_metadata(image_path: str) -> Dict:
 
 def process_photo_directory(photos_dir: str) -> pd.DataFrame:
     """Process all photos in a directory and return a DataFrame with metadata."""
-    photo_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif', '.heic', '.heif'}
+    # Only process web-ready formats (no HEIC conversion here)
+    photo_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif'}
     metadata_list = []
     
     photos_path = Path(photos_dir)
@@ -106,6 +107,11 @@ def process_photo_directory(photos_dir: str) -> pd.DataFrame:
             metadata_list.append(metadata)
     
     df = pd.DataFrame(metadata_list)
+    
+    if len(df) == 0:
+        print(f"❌ No web-ready photos found in {photos_dir}")
+        print("💡 Run 'python convert_photos.py' first to convert HEIC files to JPG")
+        return pd.DataFrame()
     
     # Filter out photos without GPS coordinates
     df_with_gps = df.dropna(subset=['latitude', 'longitude'])

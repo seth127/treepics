@@ -104,6 +104,10 @@ def deploy():
             print("Aborting deployment")
             sys.exit(1)
     
+    # Get absolute path to source directory before changing branches
+    source_dir = source_dir.resolve()
+    print(f"Absolute source directory: {source_dir}")
+    
     # Fetch latest changes from remote
     print("Fetching latest changes from remote...")
     run_command(['git', 'fetch', 'origin'])

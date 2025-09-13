@@ -187,34 +187,34 @@ def deploy():
     print("Staged files:")
     run_command(['git', 'diff', '--staged', '--name-status'])
     
-    # Check if there are changes to commit
-    # Use a different approach - check if there are staged changes
-    staged_output = run_command(['git', 'diff', '--staged', '--name-only'], capture_output=True)
-    print(f"Staged files: '{staged_output}'")
+    ## Check if there are changes to commit
+    #try:
+    #    run_command(['git', 'diff', '--staged', '--quiet'], check=False)
+    #    print("No changes to commit - site is already up to date")
+    #except subprocess.CalledProcessError:
+    #    # There are changes to commit
+    #    print("Committing changes...")
+    #    run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
+    #    
+    #    # Push to origin
+    #    print("Pushing to origin/gh-pages...")
+    #    run_command(['git', 'push', 'origin', 'gh-pages'])
+    #    
+    #    print("✅ Successfully deployed to GitHub Pages!")
+
+    # There are changes to commit
+    print("Committing changes...")
+    run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
     
-    if staged_output.strip():
-        has_changes = True
-        print("Changes detected for commit")
-    else:
-        has_changes = False
-        print("No changes to commit - site is already up to date")
+    # Push to origin
+    print("Pushing to origin/gh-pages...")
+    run_command(['git', 'push', 'origin', 'gh-pages'])
     
-    if has_changes:
-        print("Committing changes...")
-        run_command(['git', 'commit', '-m', f'Deploy site from {current_branch} to GitHub Pages'])
-        
-        # Push to origin
-        print("Pushing to origin/gh-pages...")
-        run_command(['git', 'push', 'origin', 'gh-pages'])
-        
-        print("✅ Successfully deployed to GitHub Pages!")
-    else:
-        print("No changes detected - resetting staged files")
-    
-    # Always ensure working directory is clean before switching branches
-    # This handles the case where files were added but no commit was needed
-    print("Cleaning working directory...")
-    run_command(['git', 'reset', '--hard', 'HEAD'])
+    print("✅ Successfully deployed to GitHub Pages!")
+
+    # TODO: this ^ seems to be working but revisit
+    # if there should be some better error handling or something
+    # and clean up the commented code
     
     # Switch back to original branch
     print(f"Switching back to {current_branch}...")

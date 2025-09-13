@@ -166,6 +166,10 @@ def deploy():
     # Add all files to git
     run_command(['git', 'add', '.'])
     
+    # Debug: Check git status
+    print("Git status after adding files:")
+    run_command(['git', 'status', '--porcelain'])
+    
     # Check if there are changes to commit
     try:
         run_command(['git', 'diff', '--staged', '--quiet'], check=False)
@@ -174,6 +178,7 @@ def deploy():
     except subprocess.CalledProcessError:
         # There are changes to commit
         has_changes = True
+        print("Changes detected for commit")
     
     if has_changes:
         print("Committing changes...")

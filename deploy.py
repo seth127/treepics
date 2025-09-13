@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -102,50 +103,57 @@ def deploy():
         print("Please commit or stash your changes before deploying.")
         sys.exit(1)
     
-    # Get absolute path to source directory before changing branches
-    source_dir = source_dir.resolve()
-    print(f"Absolute source directory: {source_dir}")
-    
-    # Fetch latest changes from remote
-    print("Fetching latest changes from remote...")
-    run_command(['git', 'fetch', 'origin'])
-    
-    # Switch to gh-pages branch
-    if branch_exists('gh-pages'):
-        print("Switching to existing gh-pages branch...")
-        run_command(['git', 'checkout', 'gh-pages'])
+    # Copy site contents to a temporary directory first
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        print(f"Copying site contents to temporary directory...")
+        for item in source_dir.iterdir():
+            dest = temp_path / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest)
+            else:
+                shutil.copy2(item, dest)
         
-        # Reset to remote if it exists
-        if remote_branch_exists('gh-pages'):
-            print("Resetting to origin/gh-pages...")
-            run_command(['git', 'reset', '--hard', 'origin/gh-pages'])
-    else:
-        print("Creating new gh-pages branch...")
-        if remote_branch_exists('gh-pages'):
-            # Create local branch tracking remote
-            run_command(['git', 'checkout', '-b', 'gh-pages', 'origin/gh-pages'])
+        # Fetch latest changes from remote
+        print("Fetching latest changes from remote...")
+        run_command(['git', 'fetch', 'origin'])
+        
+        # Switch to gh-pages branch
+        if branch_exists('gh-pages'):
+            print("Switching to existing gh-pages branch...")
+            run_command(['git', 'checkout', 'gh-pages'])
+            
+            # Reset to remote if it exists
+            if remote_branch_exists('gh-pages'):
+                print("Resetting to origin/gh-pages...")
+                run_command(['git', 'reset', '--hard', 'origin/gh-pages'])
         else:
-            # Create orphan branch (no history)
-            run_command(['git', 'checkout', '--orphan', 'gh-pages'])
-    
-    # Clean the gh-pages branch (remove all files except .git)
-    print("Cleaning gh-pages branch...")
-    for item in Path('.').iterdir():
-        if item.name == '.git':
-            continue
-        if item.is_dir():
-            shutil.rmtree(item)
-        else:
-            item.unlink()
-    
-    # Copy site contents to root
-    print(f"Copying site contents from {source_dir}...")
-    for item in source_dir.iterdir():
-        dest = Path('.') / item.name
-        if item.is_dir():
-            shutil.copytree(item, dest)
-        else:
-            shutil.copy2(item, dest)
+            print("Creating new gh-pages branch...")
+            if remote_branch_exists('gh-pages'):
+                # Create local branch tracking remote
+                run_command(['git', 'checkout', '-b', 'gh-pages', 'origin/gh-pages'])
+            else:
+                # Create orphan branch (no history)
+                run_command(['git', 'checkout', '--orphan', 'gh-pages'])
+        
+        # Clean the gh-pages branch (remove all files except .git)
+        print("Cleaning gh-pages branch...")
+        for item in Path('.').iterdir():
+            if item.name == '.git':
+                continue
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+        
+        # Copy site contents from temp to root
+        print(f"Copying site contents from temporary directory to gh-pages...")
+        for item in temp_path.iterdir():
+            dest = Path('.') / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest)
+            else:
+                shutil.copy2(item, dest)
     
     # Verify index.html exists at root
     if not Path('index.html').exists():

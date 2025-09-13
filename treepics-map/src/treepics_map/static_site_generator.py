@@ -394,9 +394,14 @@ function getClusteringThreshold(zoomLevel) {
     // Adjust clustering distance based on zoom level
     // Higher zoom = smaller threshold (less clustering)
     // Lower zoom = larger threshold (more clustering)
-    const baseThreshold = 0.01; // Base threshold in decimal degrees
+    
+    // Very aggressive clustering - merge pins before they visually overlap
+    const baseThreshold = 0.03; // Further increased base threshold
     const zoomFactor = Math.max(1, 18 - zoomLevel); // Zoom levels typically go from 1-18
-    return baseThreshold * Math.pow(2, zoomFactor - 10);
+    
+    // Even more aggressive exponential curve (base 3 instead of 2.5)
+    // and offset adjustment to make clustering kick in even earlier
+    return baseThreshold * Math.pow(3, zoomFactor - 7);
 }
 
 function performDynamicClustering(photos, threshold) {

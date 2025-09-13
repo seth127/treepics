@@ -123,6 +123,60 @@ def generate_map_html(clusters: List[Dict], output_path: str) -> None:
             <p>Click on map markers to explore tree photos by location</p>
         </header>
         
+        <div id="date-filters">
+            <h3>📅 Filter Photos by Date</h3>
+            
+            <div class="filter-section">
+                <h4>Timeline Filter</h4>
+                <div class="timeline-container">
+                    <input type="range" 
+                           id="timeline-slider" 
+                           class="timeline-slider"
+                           min="0" 
+                           max="100" 
+                           value="100"
+                           step="1">
+                    <div class="timeline-range">
+                        <span id="timeline-start">Start Date</span>
+                        <span id="timeline-end">End Date</span>
+                    </div>
+                    <div class="timeline-current" id="timeline-current">
+                        Showing all photos
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h4>Select Months</h4>
+                <div class="month-controls">
+                    <button class="month-control-btn" onclick="selectAllMonths()">All</button>
+                    <button class="month-control-btn" onclick="clearAllMonths()">None</button>
+                </div>
+                <div class="month-grid" id="month-grid">
+                    <button class="month-btn selected" data-month="0">Jan</button>
+                    <button class="month-btn selected" data-month="1">Feb</button>
+                    <button class="month-btn selected" data-month="2">Mar</button>
+                    <button class="month-btn selected" data-month="3">Apr</button>
+                    <button class="month-btn selected" data-month="4">May</button>
+                    <button class="month-btn selected" data-month="5">Jun</button>
+                    <button class="month-btn selected" data-month="6">Jul</button>
+                    <button class="month-btn selected" data-month="7">Aug</button>
+                    <button class="month-btn selected" data-month="8">Sep</button>
+                    <button class="month-btn selected" data-month="9">Oct</button>
+                    <button class="month-btn selected" data-month="10">Nov</button>
+                    <button class="month-btn selected" data-month="11">Dec</button>
+                </div>
+            </div>
+            
+            <div class="filter-results" id="filter-results">
+                <strong>All photos shown</strong> (no filters active)
+            </div>
+            
+            <button class="clear-filters" onclick="clearAllFilters()" disabled>
+                Clear All Filters
+            </button>
+        </div>
+
         <div id="map"></div>
         
         <div id="sidebar">
@@ -432,6 +486,190 @@ header p {
     z-index: 2001;
 }
 
+/* Date Filters */
+#date-filters {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    width: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+}
+
+#date-filters h3 {
+    margin: 0 0 1rem 0;
+    padding: 1rem 1rem 0 1rem;
+    color: #2d5a27;
+    border-bottom: 2px solid #4a7c59;
+    padding-bottom: 0.5rem;
+}
+
+.filter-section {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.filter-section h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: #2d5a27;
+    font-size: 0.95rem;
+}
+
+.filter-section:first-of-type h4 {
+    margin-top: 0;
+}
+
+/* Timeline Slider */
+.timeline-container {
+    margin: 1rem 0;
+}
+
+.timeline-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+    margin: 10px 0;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4a7c59;
+    cursor: pointer;
+    border: 2px solid #2d5a27;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.timeline-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4a7c59;
+    cursor: pointer;
+    border: 2px solid #2d5a27;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.timeline-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+.timeline-current {
+    text-align: center;
+    font-weight: bold;
+    color: #2d5a27;
+    margin: 0.5rem 0;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Month Selection */
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.month-btn {
+    padding: 0.5rem 0.25rem;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-align: center;
+    transition: all 0.2s;
+    color: #333;
+}
+
+.month-btn:hover {
+    border-color: #4a7c59;
+    background: #f8f9fa;
+}
+
+.month-btn.selected {
+    border-color: #2d5a27;
+    background: #4a7c59;
+    color: white;
+    font-weight: bold;
+}
+
+.month-controls {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.month-control-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #4a7c59;
+    background: white;
+    color: #4a7c59;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.month-control-btn:hover {
+    background: #4a7c59;
+    color: white;
+}
+
+/* Filter Results */
+.filter-results {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 1rem 0 0 0;
+    font-size: 0.85rem;
+    color: #666;
+    border-top: 1px solid #eee;
+}
+
+.filter-results strong {
+    color: #2d5a27;
+}
+
+/* Clear Filters */
+.clear-filters {
+    width: 100%;
+    padding: 0.6rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 1rem 0 0 0;
+    transition: background 0.2s;
+}
+
+.clear-filters:hover {
+    background: #c82333;
+}
+
+.clear-filters:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
 /* Mobile responsiveness for modal */
 @media (max-width: 768px) {
     .photo-modal-content {
@@ -466,6 +704,34 @@ header p {
         max-width: 90%;
         font-size: 0.9em;
     }
+
+    /* Mobile adjustments for filters */
+    #date-filters {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        margin-bottom: 1rem;
+        max-height: none;
+    }
+    
+    #sidebar {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        max-height: 300px;
+    }
+    
+    .month-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.4rem;
+    }
+    
+    .month-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.2rem;
+    }
 }
 """
     
@@ -479,9 +745,15 @@ def generate_javascript(output_path: str) -> None:
 let map;
 let currentMarkers = [];
 let allPhotos = []; // Store all individual photos for dynamic clustering
+let filteredPhotos = []; // Photos after applying date filters
 let currentZoom = 10;
 let currentClusterPhotos = []; // Photos in the currently viewed cluster
 let currentPhotoIndex = 0; // Index of currently displayed photo in modal
+
+// Date filtering state
+let timelineStart = null;
+let timelineEnd = null;
+let selectedMonths = new Set([0,1,2,3,4,5,6,7,8,9,10,11]); // All months selected by default
 
 function initializeMap(photoClusters) {
     // Initialize the map
@@ -499,6 +771,19 @@ function initializeMap(photoClusters) {
             allPhotos.push(photo);
         });
     });
+    
+    // Sort photos by date for timeline initialization
+    allPhotos.sort((a, b) => {
+        const dateA = a.datetime_taken ? new Date(a.datetime_taken) : new Date(0);
+        const dateB = b.datetime_taken ? new Date(b.datetime_taken) : new Date(0);
+        return dateA - dateB;
+    });
+    
+    // Initialize filtered photos to include all photos initially
+    filteredPhotos = [...allPhotos];
+    
+    // Initialize date filters
+    initializeDateFilters();
     
     // Add initial markers
     updateMarkersForZoom();
@@ -524,8 +809,8 @@ function updateMarkersForZoom() {
     // Calculate clustering threshold based on zoom level
     const clusteringThreshold = getClusteringThreshold(currentZoom);
     
-    // Perform dynamic clustering
-    const dynamicClusters = performDynamicClustering(allPhotos, clusteringThreshold);
+    // Perform dynamic clustering using filtered photos
+    const dynamicClusters = performDynamicClustering(filteredPhotos, clusteringThreshold);
     
     // Add new markers
     addPhotoMarkers(dynamicClusters);
@@ -827,6 +1112,190 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Date filtering functions
+function initializeDateFilters() {
+    if (allPhotos.length === 0) return;
+    
+    // Find date range from all photos
+    const validPhotos = allPhotos.filter(photo => photo.datetime_taken);
+    if (validPhotos.length === 0) return;
+    
+    const dates = validPhotos.map(photo => new Date(photo.datetime_taken));
+    timelineStart = new Date(Math.min(...dates));
+    timelineEnd = new Date(Math.max(...dates));
+    
+    // Initialize timeline slider
+    const slider = document.getElementById('timeline-slider');
+    const timelineStartEl = document.getElementById('timeline-start');
+    const timelineEndEl = document.getElementById('timeline-end');
+    
+    timelineStartEl.textContent = formatDate(timelineStart);
+    timelineEndEl.textContent = formatDate(timelineEnd);
+    
+    // Set up timeline slider event listener
+    slider.addEventListener('input', function() {
+        updateTimelineFilter();
+        applyFilters();
+    });
+    
+    // Set up month button event listeners
+    const monthButtons = document.querySelectorAll('.month-btn');
+    monthButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            toggleMonth(parseInt(this.dataset.month));
+            applyFilters();
+        });
+    });
+    
+    // Initial filter results display
+    updateFilterResults();
+}
+
+function updateTimelineFilter() {
+    const slider = document.getElementById('timeline-slider');
+    const currentEl = document.getElementById('timeline-current');
+    const percentage = slider.value / 100;
+    
+    if (percentage === 1) {
+        currentEl.innerHTML = '<strong>Showing all photos</strong>';
+        return null;
+    }
+    
+    // Calculate cutoff date based on percentage
+    const totalTime = timelineEnd.getTime() - timelineStart.getTime();
+    const cutoffTime = timelineStart.getTime() + (totalTime * percentage);
+    const cutoffDate = new Date(cutoffTime);
+    
+    currentEl.innerHTML = `<strong>Photos through:</strong><br>${formatDate(cutoffDate)}`;
+    return cutoffDate;
+}
+
+function applyFilters() {
+    // Get current timeline cutoff
+    const timelineCutoff = updateTimelineFilter();
+    
+    // Filter photos based on timeline and selected months
+    filteredPhotos = allPhotos.filter(photo => {
+        if (!photo.datetime_taken) return false;
+        
+        const photoDate = new Date(photo.datetime_taken);
+        
+        // Check timeline filter
+        if (timelineCutoff && photoDate > timelineCutoff) {
+            return false;
+        }
+        
+        // Check month filter
+        const photoMonth = photoDate.getMonth();
+        if (!selectedMonths.has(photoMonth)) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Update markers on map
+    updateMarkersForZoom();
+    
+    // Update filter results display
+    updateFilterResults();
+    
+    // Update clear filters button
+    updateClearFiltersButton();
+    
+    // Clear photo viewer if current cluster is no longer visible
+    updatePhotoViewer();
+}
+
+function toggleMonth(monthIndex) {
+    const monthBtn = document.querySelector(`[data-month="${monthIndex}"]`);
+    
+    if (selectedMonths.has(monthIndex)) {
+        selectedMonths.delete(monthIndex);
+        monthBtn.classList.remove('selected');
+    } else {
+        selectedMonths.add(monthIndex);
+        monthBtn.classList.add('selected');
+    }
+}
+
+function selectAllMonths() {
+    selectedMonths = new Set([0,1,2,3,4,5,6,7,8,9,10,11]);
+    document.querySelectorAll('.month-btn').forEach(btn => {
+        btn.classList.add('selected');
+    });
+    applyFilters();
+}
+
+function clearAllMonths() {
+    selectedMonths = new Set();
+    document.querySelectorAll('.month-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    applyFilters();
+}
+
+function clearAllFilters() {
+    // Reset timeline slider
+    const slider = document.getElementById('timeline-slider');
+    slider.value = 100;
+    
+    // Reset month selection
+    selectAllMonths();
+    
+    // Apply filters (which will show all photos)
+    applyFilters();
+}
+
+function updateFilterResults() {
+    const resultsEl = document.getElementById('filter-results');
+    const totalPhotos = allPhotos.length;
+    const filteredCount = filteredPhotos.length;
+    
+    if (filteredCount === totalPhotos) {
+        resultsEl.innerHTML = '<strong>All photos shown</strong> (no filters active)';
+    } else {
+        const percentage = Math.round((filteredCount / totalPhotos) * 100);
+        resultsEl.innerHTML = `<strong>${filteredCount} of ${totalPhotos} photos shown</strong> (${percentage}%)`;
+    }
+}
+
+function updateClearFiltersButton() {
+    const clearBtn = document.querySelector('.clear-filters');
+    const slider = document.getElementById('timeline-slider');
+    const isTimelineFiltered = slider.value < 100;
+    const isMonthFiltered = selectedMonths.size < 12;
+    
+    clearBtn.disabled = !isTimelineFiltered && !isMonthFiltered;
+}
+
+function updatePhotoViewer() {
+    // If a cluster is currently being displayed, check if it still has visible photos
+    if (currentClusterPhotos.length > 0) {
+        const visiblePhotos = currentClusterPhotos.filter(photo => 
+            filteredPhotos.some(fp => fp.filename === photo.filename)
+        );
+        
+        if (visiblePhotos.length === 0) {
+            // No photos in current cluster are visible, clear the viewer
+            const photoViewer = document.getElementById('photo-viewer');
+            photoViewer.innerHTML = `
+                <h3>Select a location on the map</h3>
+                <p>Click on any tree marker to view photos from that location.</p>
+            `;
+            currentClusterPhotos = [];
+        }
+    }
+}
+
+function formatDate(date) {
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
 """
     
     with open(output_path, 'w', encoding='utf-8') as f:

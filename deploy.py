@@ -188,14 +188,16 @@ def deploy():
     run_command(['git', 'diff', '--staged', '--name-status'])
     
     # Check if there are changes to commit
-    try:
-        run_command(['git', 'diff', '--staged', '--quiet'], check=False)
-        print("No changes to commit - site is already up to date")
-        has_changes = False
-    except subprocess.CalledProcessError:
-        # There are changes to commit
+    # Use a different approach - check if there are staged changes
+    staged_output = run_command(['git', 'diff', '--staged', '--name-only'], capture_output=True)
+    print(f"Staged files: '{staged_output}'")
+    
+    if staged_output.strip():
         has_changes = True
         print("Changes detected for commit")
+    else:
+        has_changes = False
+        print("No changes to commit - site is already up to date")
     
     if has_changes:
         print("Committing changes...")

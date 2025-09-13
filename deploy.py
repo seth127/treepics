@@ -171,12 +171,21 @@ def deploy():
     
     print("Site contents copied successfully!")
     
+    # Debug: Check what files exist before adding
+    print("Files in gh-pages directory after copying:")
+    run_command(['ls', '-la'])
+    
     # Add all files to git
     run_command(['git', 'add', '.'])
     
     # Debug: Check git status
     print("Git status after adding files:")
-    run_command(['git', 'status', '--porcelain'])
+    status_output = run_command(['git', 'status', '--porcelain'], capture_output=True)
+    print(f"Status output: '{status_output}'")
+    
+    # Debug: Check what's staged
+    print("Staged files:")
+    run_command(['git', 'diff', '--staged', '--name-status'])
     
     # Check if there are changes to commit
     try:

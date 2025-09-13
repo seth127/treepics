@@ -118,33 +118,42 @@ def deploy():
         print("Fetching latest changes from remote...")
         run_command(['git', 'fetch', 'origin'])
         
-        # Switch to gh-pages branch
+        # Switch to gh-pages branch and reset to clean state
         if branch_exists('gh-pages'):
             print("Switching to existing gh-pages branch...")
             run_command(['git', 'checkout', 'gh-pages'])
             
-            # Reset to remote if it exists
+            # Reset to remote if it exists to get a clean state
             if remote_branch_exists('gh-pages'):
                 print("Resetting to origin/gh-pages...")
                 run_command(['git', 'reset', '--hard', 'origin/gh-pages'])
+                
+            # Clean the gh-pages branch (remove all files except .git)
+            print("Cleaning gh-pages branch...")
+            for item in Path('.').iterdir():
+                if item.name == '.git':
+                    continue
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
         else:
             print("Creating new gh-pages branch...")
             if remote_branch_exists('gh-pages'):
                 # Create local branch tracking remote
                 run_command(['git', 'checkout', '-b', 'gh-pages', 'origin/gh-pages'])
+                # Clean the branch
+                print("Cleaning gh-pages branch...")
+                for item in Path('.').iterdir():
+                    if item.name == '.git':
+                        continue
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
             else:
                 # Create orphan branch (no history)
                 run_command(['git', 'checkout', '--orphan', 'gh-pages'])
-        
-        # Clean the gh-pages branch (remove all files except .git)
-        print("Cleaning gh-pages branch...")
-        for item in Path('.').iterdir():
-            if item.name == '.git':
-                continue
-            if item.is_dir():
-                shutil.rmtree(item)
-            else:
-                item.unlink()
         
         # Copy site contents from temp to root
         print(f"Copying site contents from temporary directory to gh-pages...")
@@ -162,8 +171,21 @@ def deploy():
     
     print("Site contents copied successfully!")
     
+    # Debug: Check what files exist before adding
+    print("Files in gh-pages directory after copying:")
+    run_command(['ls', '-la'])
+    
     # Add all files to git
     run_command(['git', 'add', '.'])
+    
+    # Debug: Check git status
+    print("Git status after adding files:")
+    status_output = run_command(['git', 'status', '--porcelain'], capture_output=True)
+    print(f"Status output: '{status_output}'")
+    
+    # Debug: Check what's staged
+    print("Staged files:")
+    run_command(['git', 'diff', '--staged', '--name-status'])
     
     ## Check if there are changes to commit
     #try:

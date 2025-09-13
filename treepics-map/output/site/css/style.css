@@ -95,11 +95,18 @@ header p {
 
 /* Custom marker styles */
 .tree-marker {
-    background: #4a7c59;
-    border: 2px solid #2d5a27;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+}
+
+.tree-marker div {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tree-marker:hover div {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* Responsive design */

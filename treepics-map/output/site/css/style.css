@@ -95,11 +95,18 @@ header p {
 
 /* Custom marker styles */
 .tree-marker {
-    background: #4a7c59;
-    border: 2px solid #2d5a27;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+}
+
+.tree-marker div {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tree-marker:hover div {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* Responsive design */
@@ -131,6 +138,7 @@ header p {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.9);
+    user-select: none;
 }
 
 .photo-modal-content {
@@ -141,12 +149,25 @@ header p {
     max-width: 800px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-modal-image-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .photo-modal img {
-    width: 100%;
-    height: auto;
+    max-width: 100%;
+    max-height: 80vh;
     border-radius: 4px;
+    object-fit: contain;
 }
 
 .photo-modal-close {
@@ -157,8 +178,133 @@ header p {
     font-size: 35px;
     font-weight: bold;
     cursor: pointer;
+    z-index: 2001;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
 }
 
 .photo-modal-close:hover {
-    opacity: 0.7;
+    background: rgba(0,0,0,0.8);
+}
+
+/* Gallery navigation arrows */
+.photo-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, opacity 0.2s;
+    z-index: 2001;
+    user-select: none;
+}
+
+.photo-modal-nav:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+.photo-modal-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.photo-modal-nav:disabled:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+.photo-modal-prev {
+    left: 20px;
+}
+
+.photo-modal-next {
+    right: 20px;
+}
+
+/* Photo info in modal */
+.photo-modal-info {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 80%;
+    z-index: 2001;
+}
+
+.photo-modal-info .photo-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.photo-modal-info .photo-details {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.photo-modal-counter {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    z-index: 2001;
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 768px) {
+    .photo-modal-content {
+        padding: 10px;
+    }
+    
+    .photo-modal-nav {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    .photo-modal-prev {
+        left: 10px;
+    }
+    
+    .photo-modal-next {
+        right: 10px;
+    }
+    
+    .photo-modal-close {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+    
+    .photo-modal-info {
+        bottom: 10px;
+        padding: 8px 16px;
+        max-width: 90%;
+        font-size: 0.9em;
+    }
 }

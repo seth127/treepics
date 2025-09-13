@@ -127,24 +127,34 @@ def deploy():
             if remote_branch_exists('gh-pages'):
                 print("Resetting to origin/gh-pages...")
                 run_command(['git', 'reset', '--hard', 'origin/gh-pages'])
+                
+                # Clean the gh-pages branch (remove all files except .git)
+                print("Cleaning gh-pages branch...")
+                for item in Path('.').iterdir():
+                    if item.name == '.git':
+                        continue
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
         else:
             print("Creating new gh-pages branch...")
             if remote_branch_exists('gh-pages'):
                 # Create local branch tracking remote
                 run_command(['git', 'checkout', '-b', 'gh-pages', 'origin/gh-pages'])
+                
+                # Clean the gh-pages branch (remove all files except .git)
+                print("Cleaning gh-pages branch...")
+                for item in Path('.').iterdir():
+                    if item.name == '.git':
+                        continue
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
             else:
                 # Create orphan branch (no history)
                 run_command(['git', 'checkout', '--orphan', 'gh-pages'])
-        
-        # Clean the gh-pages branch (remove all files except .git)
-        print("Cleaning gh-pages branch...")
-        for item in Path('.').iterdir():
-            if item.name == '.git':
-                continue
-            if item.is_dir():
-                shutil.rmtree(item)
-            else:
-                item.unlink()
         
         # Copy site contents from temp to root
         print(f"Copying site contents from temporary directory to gh-pages...")
@@ -176,16 +186,19 @@ def deploy():
     
     if has_changes:
         print("Committing changes...")
-        run_command(['git', 'commit', '-m', 'Deploy site to GitHub Pages'])
+        run_command(['git', 'commit', '-m', f'Deploy site from {current_branch} to GitHub Pages'])
         
         # Push to origin
         print("Pushing to origin/gh-pages...")
         run_command(['git', 'push', 'origin', 'gh-pages'])
         
         print("✅ Successfully deployed to GitHub Pages!")
+    else:
+        print("No changes detected - resetting staged files")
     
     # Always ensure working directory is clean before switching branches
     # This handles the case where files were added but no commit was needed
+    print("Cleaning working directory...")
     run_command(['git', 'reset', '--hard', 'HEAD'])
     
     # Switch back to original branch

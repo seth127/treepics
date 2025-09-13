@@ -2,6 +2,7 @@
 
 # Photo formats
 *.HEIC
+*.PNG
 # *.jpg  # Allow converted web-ready JPGs to be committed
 
 ##########################################
